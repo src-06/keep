@@ -1,100 +1,44 @@
-pkgs: let
-  inherit (pkgs) lib;
-  preservationLib = import ../lib.nix {inherit lib;};
-in {
-  name = "preservation-basic";
+pkgs: {
+  name = "keep-basic";
 
   nodes.machine = {pkgs, ...}: {
-    # import the preservation module
+    # import the keep module
     imports = [../module.nix];
 
     # module configuration
-    preservation = {
-      # global enable switch
-      enable = true;
-      # all files and directories are preserved under "/state" in this test
-      preserveAt."/state" = {
-        commonMountOptions = [
-          "x-foo"
-        ];
-        directories = [
-          "/var/lib/someservice"
-          "/var/log"
-        ];
-        files = [
-          {
-            file = "/etc/wpa_supplicant.conf";
-            how = "symlink";
-          }
-          # some files need to be prepared very early, machine-id is one such case
-          {
-            file = "/etc/machine-id";
-            inInitrd = true;
-          }
-          # persist SSH host keys
-          {
-            file = "/etc/ssh/ssh_host_rsa_key";
-            how = "symlink";
-            configureParent = true;
-          }
-          {
-            file = "/etc/ssh/ssh_host_ed25519_key";
-            how = "symlink";
-            configureParent = true;
-          }
-        ];
-      };
-      # per-user configuration using inUser
-      preserveAt."/state/alice" = {
-        persistentStoragePath = "/state";
-        inUser = "alice";
-        directories = [
-          ".rabbit_hole"
-          ".config/kitty"
-          ".local/share/fish"
-          ".locale/state/wireplumber"
-        ];
-      };
-      preserveAt."/state/butz" = {
-        persistentStoragePath = "/state";
-        inUser = "butz";
-        commonMountOptions = [
-          "x-bar"
-        ];
-        files = [
-          {
-            file = ".config/foo";
-            mode = "0600";
-          }
-          "bar"
-          # an empty file with may be created at the symlink's
-          # target, i.e. on the persistent volume
-          {
-            file = ".symlinks/baz";
-            how = "symlink";
-            createLinkTarget = true;
-          }
-          # this file should be mounted and with the combination of all three
-          # configured `x-foo`, `x-bar` and `x-baz`.
-          {
-            file = "yay_userspace_mount_options";
-            mountOptions = ["x-baz"];
-          }
-          # a symlinked file in the user's home directory
-          {
-            file = ".toplevel_symlink";
-            how = "symlink";
-          }
-        ];
-        directories = [
-          "unshaved_yaks"
-          "foo/bar/baz"
-          {
-            directory = "symlinked_user_dir";
-            how = "symlink";
-          }
-        ];
-      };
+    keepTo."/state" = {
+      dirs = [
+        "/var/lib/someservice"
+        "/var/log"
+      ];
+      files = [
+        {
+          file = "/etc/wpa_supplicant.conf";
+          method = "symlink";
+        }
+        # some files need to be prepared very early, machine-id is one such case
+        {
+          file = "/etc/machine-id";
+          inInitrd = true;
+        }
+        # persist SSH host keys
+        {
+          file = "/etc/ssh/ssh_host_rsa_key";
+          method = "symlink";
+          parent.enable = true;
+        }
+        {
+          file = "/etc/ssh/ssh_host_ed25519_key";
+          method = "symlink";
+          parent.enable = true;
+        }
+        # this file should be mounted and with the combination of all
+        # configured `x-foo` and `x-baz`.
+        {
+          file = "/etc/yay_userspace_mount_options";
+          mountOptions = ["x-foo" "x-baz"];
+        }
+      ];
     };
 
     # systemd-machine-id-commit.service would fail, but it is not relevant
@@ -115,15 +59,6 @@ in {
     };
     networking.useNetworkd = true;
 
-    users.users = {
-      alice = {
-        isNormalUser = true;
-        # custom home directory
-        home = "/home/wonderland";
-      };
-      butz.isNormalUser = true;
-    };
-
     virtualisation = {
       memorySize = 2048;
       # separate block device for preserved state
@@ -138,14 +73,8 @@ in {
   };
 
   testScript = {nodes, ...}: let
-    butzHome = nodes.machine.users.users.butz.home;
-
-    allFiles = lib.flatten (
-      lib.mapAttrsToList (_: preservationLib.getAllFiles) nodes.machine.preservation.preserveAt
-    );
-    allDirs = lib.flatten (
-      lib.mapAttrsToList (_: preservationLib.getAllDirectories) nodes.machine.preservation.preserveAt
-    );
+    allFiles = nodes.machine.keepTo."/state".files;
+    allDirs = nodes.machine.keepTo."/state".dirs;
     initrdFiles = builtins.filter (conf: conf.inInitrd) allFiles;
     initrdDirs = builtins.filter (conf: conf.inInitrd) allDirs;
     initrdJSON = builtins.toJSON (initrdDirs ++ initrdFiles);
@@ -163,39 +92,43 @@ in {
 
       def check_file(config, in_initrd=False):
         prefix = "/sysroot" if in_initrd else ""
-        file_path = config.get("directory", config.get("file"))
+        file_path = config.get("dir", config.get("file"))
         path = f"{prefix}{file_path}"
 
-        match config["how"]:
-          case "bindmount":
-            # check that file is mounted
-            machine.succeed(f"mountpoint {path}")
+        if config.get("scaffold"):
+          # scaffold entries only ever refer to dirs
+          machine.succeed(f"test -d {path}")
 
-            # check permissions and ownership
-            actual = machine.succeed(f"stat -c '0%a %U %G' {path} | tee /dev/stderr").strip()
-            expected = "{} {} {}".format(config["mode"],config["user"],config["group"])
-            t.assertEqual(actual, expected, "unexpected file attributes")
+          # scaffolds are never mounted
+          machine.fail(f"mountpoint {path}")
 
-          case "symlink":
-            # check that file is _not_ mounted
-            machine.fail(f"mountpoint {path}")
+          # check permissions and ownership
+          actual = machine.succeed(f"stat -c '0%a %U %G' {path} | tee /dev/stderr").strip()
+          expected = "{} {} {}".format("0755",config["user"],config["group"])
+          t.assertEqual(actual, expected, "unexpected file attributes")
 
-          case "_intermediate":
-            # intermediate paths only ever refer to directories
-            machine.succeed(f"test -d {path}")
+        else:
+          match config["method"]:
+            case "bindmount":
+              # check that file is mounted
+              machine.succeed(f"mountpoint {path}")
 
-            # check permissions and ownership
-            actual = machine.succeed(f"stat -c '0%a %U %G' {path} | tee /dev/stderr").strip()
-            expected = "{} {} {}".format("0755",config["user"],config["group"])
-            t.assertEqual(actual, expected, "unexpected file attributes")
+              # check permissions and ownership
+              actual = machine.succeed(f"stat -c '0%a %U %G' {path} | tee /dev/stderr").strip()
+              expected = "{} {} {}".format(config["mode"],config["user"],config["group"])
+              t.assertEqual(actual, expected, "unexpected file attributes")
 
-          case x:
-            raise Exception(f"Unknown case: {x}")
+            case "symlink":
+              # check that file is _not_ mounted
+              machine.fail(f"mountpoint {path}")
 
-        if config.get("configureParent") == True:
+            case x:
+              raise Exception(f"Unknown case: {x}")
+
+        if config.get("parent", {}).get("enable") == True:
           parent = os.path.dirname(path)
           config = config["parent"]
-          # check permissions and ownership of parent directory
+          # check permissions and ownership of parent dir
           actual = machine.succeed(f"stat -c '0%a %U %G' {parent} | tee /dev/stderr").strip()
           expected = "{} {} {}".format(config["mode"],config["user"],config["group"])
           t.assertEqual(actual, expected, "unexpected file attributes")
@@ -237,16 +170,10 @@ in {
       with subtest("sshd service running"):
         machine.wait_for_unit("sshd.service")
 
-      with subtest("Unpreserved intermediate user directories have correct permissions and ownership"):
-          for path_segment in [ "foo", "foo/bar" ]:
-            actual = machine.succeed(f"stat -c '0%a %U %G' /home/butz/{path_segment} | tee /dev/stderr").strip()
-            expected = "0755 butz users"
-            t.assertEqual(actual, expected, "unexpected file attributes")
-
       with subtest("Files preserved across reboots"):
-        # write something in one of the preserved files
+        # write something in one of the preserved dirs
         teststring = "foobarbaz"
-        machine.succeed(f"echo -n '{teststring}' > ${butzHome}/bar")
+        machine.succeed(f"echo -n '{teststring}' > /var/log/keep-test-content")
 
         # get current machine id
         machine_id = machine.succeed("cat /etc/machine-id")
@@ -278,8 +205,8 @@ in {
         t.assertEqual(new_machine_id, machine_id, "machine id changed")
 
         # check that state in file was also preserved
-        machine.succeed("test -s ${butzHome}/bar")
-        content = machine.succeed("cat ${butzHome}/bar")
+        machine.succeed("test -s /var/log/keep-test-content")
+        content = machine.succeed("cat /var/log/keep-test-content")
         t.assertEqual(content, teststring, "unexpected file content")
 
       with subtest("Type, permissions and ownership after reboot"):
@@ -287,8 +214,8 @@ in {
           check_file(file)
 
       with subtest("Custom (userspace) mount options are applied"):
-        utab_entry = machine.succeed("grep TARGET=/home/butz/yay_userspace_mount_options /run/mount/utab")
-        for opt in [ "x-foo", "x-bar", "x-baz"]:
+        utab_entry = machine.succeed("grep TARGET=/etc/yay_userspace_mount_options /run/mount/utab")
+        for opt in [ "x-foo", "x-baz"]:
           t.assertIn(opt, utab_entry, "expected mount option not found")
 
       machine.shutdown()

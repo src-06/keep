@@ -1,10 +1,10 @@
 [book]
-title = "Preservation"
+title = "Keep"
 authors = ["Willi Butz"]
 language = "en"
 src = "src"
 
 [output.html]
 additional-css = ["custom.css"]
-git-repository-url = "https://github.com/nix-community/preservation"
-edit-url-template = "https://github.com/nix-community/preservation/edit/main/docs/{path}"
+git-repository-url = "https://github.com/src-06/keep"
+edit-url-template = "https://github.com/src-06/keep/edit/main/docs/{path}"

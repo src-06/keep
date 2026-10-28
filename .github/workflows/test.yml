@@ -20,6 +20,8 @@ jobs:
         run: nix flake check --log-format raw-with-logs --no-build ./tests
       - name: default test
         run: nix build --log-format raw-with-logs -L ./tests#checks.x86_64-linux.default
+      - name: user test
+        run: nix build --log-format raw-with-logs -L ./tests#checks.x86_64-linux.user
       - name: firstboot test
         run: nix build --log-format raw-with-logs -L ./tests#checks.x86_64-linux.firstboot
 

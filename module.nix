@@ -1,51 +1,46 @@
-{ config, lib, ... }:
-
-let
-  cfg = config.preservation;
-
-  inherit (import ./lib.nix { inherit lib config; })
+{
+  config,
+  lib,
+  ...
+}: let
+  inherit
+    (import ./lib.nix {inherit lib;})
     mkRegularMountUnits
     mkInitrdMountUnits
     mkRegularTmpfilesRules
     mkInitrdTmpfilesRules
     ;
-in
-{
+
+  # entries that contain something to preserve; the module is active only if there is at least one
+  enabled = lib.filterAttrs (_: entry: entry.dirs != [] || entry.files != []) config.keepTo;
+  # concatenate the results (lists of rules / units) of applying `f` to every enabled entry
+  perEntry = f: lib.concatLists (lib.mapAttrsToList (_: entry: f entry) enabled);
+  # merge the concatenated tmpfiles rule sets of every enabled entry
+  mergedPerEntry = f: lib.mkMerge (perEntry f);
+in {
   imports = [
     ./options.nix
   ];
 
-  config = lib.mkIf cfg.enable {
-    assertions = [
-      {
-        assertion = config.boot.initrd.systemd.enable;
-        message = "This module cannot be used with scripted initrd.";
-      }
-    ];
-
+  config = lib.mkIf (enabled != {}) {
     boot.initrd.systemd = {
-      targets.initrd-preservation = {
-        description = "Initrd Preservation Mounts";
-        before = [ "initrd.target" ];
-        wantedBy = [ "initrd.target" ];
+      targets.initrd-keep = {
+        description = "Initrd Keep Mounts";
+        before = ["initrd.target"];
+        wantedBy = ["initrd.target"];
       };
-      tmpfiles.settings.preservation = lib.mkMerge (
-        lib.flatten (lib.mapAttrsToList mkInitrdTmpfilesRules cfg.preserveAt)
-      );
-      mounts = lib.flatten (lib.mapAttrsToList mkInitrdMountUnits cfg.preserveAt);
+      tmpfiles.settings.keep = mergedPerEntry mkInitrdTmpfilesRules;
+      mounts = perEntry mkInitrdMountUnits;
     };
 
     systemd = {
-      targets.preservation = {
-        description = "Preservation Mounts";
-        before = [ "sysinit.target" ];
-        wantedBy = [ "sysinit.target" ];
+      targets.keep = {
+        description = "Keep Mounts";
+        before = ["sysinit.target"];
+        wantedBy = ["sysinit.target"];
       };
-      tmpfiles.settings.preservation = lib.mkMerge (
-        lib.flatten (lib.mapAttrsToList mkRegularTmpfilesRules cfg.preserveAt)
-      );
-      mounts = lib.flatten (lib.mapAttrsToList mkRegularMountUnits cfg.preserveAt);
+      tmpfiles.settings.keep = mergedPerEntry mkRegularTmpfilesRules;
+      mounts = perEntry mkRegularMountUnits;
     };
-
   };
 }

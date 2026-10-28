@@ -7,19 +7,19 @@
 
   outputs = inputs:
     inputs.flake-parts.lib.mkFlake
-      { inherit inputs; }
-      {
-        systems = [
-          "x86_64-linux"
-          "aarch64-linux"
-        ];
-        perSystem = { pkgs, ... }:
-          {
-            checks = {
-              default = pkgs.nixosTest (import ./basic.nix pkgs);
-              firstboot = pkgs.nixosTest (import ./firstboot.nix pkgs);
-              verity-image = pkgs.nixosTest (import ./appliance-image-verity.nix pkgs);
-            };
-          };
+    {inherit inputs;}
+    {
+      systems = [
+        "x86_64-linux"
+        "aarch64-linux"
+      ];
+      perSystem = {pkgs, ...}: {
+        checks = {
+          default = pkgs.nixosTest (import ./basic.nix pkgs);
+          user = pkgs.nixosTest (import ./user.nix pkgs);
+          firstboot = pkgs.nixosTest (import ./firstboot.nix pkgs);
+          verity-image = pkgs.nixosTest (import ./appliance-image-verity.nix pkgs);
+        };
       };
+    };
 }
