@@ -1,0 +1,661 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Configuration Options - Keep</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="custom.css">
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Keep</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/src-06/keep" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/src-06/keep/edit/main/docs/src/configuration-options.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h2 id="keepto"><a class="header" href="#keepto">keepTo</a></h2>
+<p>Specify multiple persistent storage locations to preserve state at.</p>
+<p>Each attribute name is the path of a persistent storage root; the
+entry’s <code>dirs</code> and <code>files</code> are stored beneath it.
+Entries are independent: they may serve different users and apply
+different settings.</p>
+<p><em>Type:</em>
+attribute set of (submodule)</p>
+<p><em>Default:</em>
+<code>{ }</code></p>
+<p><em>Example:</em></p>
+<pre><code>{
+  keepTo."/keep/host_systems" = {
+    # system-level, paths are absolute (username defaults to "root")
+    enable = true;
+    dirs = ["/var/lib/service"];
+  };
+  keepTo."/keep/user_data" = {
+    # paths are relative to the user's home dir
+    enable = true;
+    username = "alice";
+    dirs = ["Documents"];
+  };
+}
+
+</code></pre>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/src-06/keep/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="keeptonamedirs"><a class="header" href="#keeptonamedirs">keepTo.&lt;name&gt;.dirs</a></h2>
+<p>Specify a list of dirs that should be preserved.
+The paths are interpreted as absolute paths for system entries
+(when <code>username</code> is <code>root</code>), or relative to the user’s
+home dir when <code>username</code> is set to another user.</p>
+<p><em>Type:</em>
+list of ((submodule) or string convertible to it)</p>
+<p><em>Default:</em>
+<code>[ ]</code></p>
+<p><em>Example:</em></p>
+<pre><code>[
+  "/var/lib/someservice"
+]
+</code></pre>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/src-06/keep/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="keeptonamedirsdir"><a class="header" href="#keeptonamedirsdir">keepTo.&lt;name&gt;.dirs.*.dir</a></h2>
+<p>Specify the path to the dir that should be preserved.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/src-06/keep/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="keeptonamedirsgroup"><a class="header" href="#keeptonamedirsgroup">keepTo.&lt;name&gt;.dirs.*.group</a></h2>
+<p>Specify the group that owns the dir.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Default:</em>
+<code>config.users.users.${defaultOwner}.group</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/src-06/keep/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="keeptonamedirsininitrd"><a class="header" href="#keeptonamedirsininitrd">keepTo.&lt;name&gt;.dirs.*.inInitrd</a></h2>
+<p>Whether to prepare preservation of this dir in initrd.</p>
+<p><strong>Note:</strong> For most dirs there is no need to enable this option.</p>
+<p><strong>Important:</strong> Note that both owner and group for this dir need to be
+available in the initrd for permissions to be set correctly.</p>
+<p><em>Type:</em>
+boolean</p>
+<p><em>Default:</em>
+<code>false</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/src-06/keep/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="keeptonamedirsmethod"><a class="header" href="#keeptonamedirsmethod">keepTo.&lt;name&gt;.dirs.*.method</a></h2>
+<p>Specify how this dir should be preserved.</p>
+<ol>
+<li>
+<p>Either a dir is created both on the volatile and on the
+persistent volume, with a bind mount from the former to the
+latter.</p>
+</li>
+<li>
+<p>Or a symlink is created on the volatile volume, pointing
+to the corresponding location on the persistent volume.</p>
+</li>
+</ol>
+<p><em>Type:</em>
+one of “bindmount”, “symlink”</p>
+<p><em>Default:</em>
+<code>"bindmount"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/src-06/keep/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="keeptonamedirsmktarget"><a class="header" href="#keeptonamedirsmktarget">keepTo.&lt;name&gt;.dirs.*.mkTarget</a></h2>
+<p>Only used when <code>method</code> is set to <code>symlink</code>.</p>
+<p>Specify whether to create an empty dir with the specified ownership
+and permissions as target of the symlink.</p>
+<p><em>Type:</em>
+boolean</p>
+<p><em>Default:</em>
+<code>false</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/src-06/keep/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="keeptonamedirsmode"><a class="header" href="#keeptonamedirsmode">keepTo.&lt;name&gt;.dirs.*.mode</a></h2>
+<p>Specify the access mode of the dir.
+See the section <code>Mode</code> in <a href="https://www.freedesktop.org/software/systemd/man/tmpfiles.d.html"><code>tmpfiles.d(5)</code></a> for more information.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Default:</em>
+<code>"0755"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/src-06/keep/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="keeptonamedirsmountoptions"><a class="header" href="#keeptonamedirsmountoptions">keepTo.&lt;name&gt;.dirs.*.mountOptions</a></h2>
+<p>Specify a list of mount options that should be used for this dir.
+These options are only used when <code>method</code> is set to <code>bindmount</code>.
+By default, <code>bind</code> and <code>X-fstrim.notrim</code> are added,
+use <code>mkForce</code> to override these if needed.
+See also <code>fstrim(8)</code>.</p>
+<p><em>Type:</em>
+list of ((submodule) or string convertible to it)</p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/src-06/keep/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="keeptonamedirsmountoptionsname"><a class="header" href="#keeptonamedirsmountoptionsname">keepTo.&lt;name&gt;.dirs.*.mountOptions.*.name</a></h2>
+<p>Specify the name of the mount option.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Example:</em>
+<code>"bind"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/src-06/keep/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="keeptonamedirsmountoptionsvalue"><a class="header" href="#keeptonamedirsmountoptionsvalue">keepTo.&lt;name&gt;.dirs.*.mountOptions.*.value</a></h2>
+<p>Optionally specify a value for the mount option.</p>
+<p><em>Type:</em>
+null or string</p>
+<p><em>Default:</em>
+<code>null</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/src-06/keep/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="keeptonamedirsparentenable"><a class="header" href="#keeptonamedirsparentenable">keepTo.&lt;name&gt;.dirs.*.parent.enable</a></h2>
+<p>Specify whether the parent dir of this dir shall be configured with
+custom ownership and permissions.</p>
+<p>By default, missing parent dirs are always created with ownership
+<code>root:root</code> and mode <code>0755</code>, as described in <a href="https://www.freedesktop.org/software/systemd/man/tmpfiles.d.html"><code>tmpfiles.d(5)</code></a>.</p>
+<p>Ownership and mode may be configured through the options
+<code>parent.user</code>,
+<code>parent.group</code>,
+<code>parent.mode</code>.</p>
+<p>Defaults to <code>true</code> when <code>username</code> is not <code>root</code> and the path
+has a parent dir (is not a top-level path).</p>
+<p><em>Type:</em>
+boolean</p>
+<p><em>Default:</em>
+<code>false</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/src-06/keep/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="keeptonamedirsparentgroup"><a class="header" href="#keeptonamedirsparentgroup">keepTo.&lt;name&gt;.dirs.*.parent.group</a></h2>
+<p>Specify the group that owns the parent dir of this dir.
+Defaults to <code>group</code> of this entry.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Default:</em>
+<code>config.group</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/src-06/keep/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="keeptonamedirsparentmode"><a class="header" href="#keeptonamedirsparentmode">keepTo.&lt;name&gt;.dirs.*.parent.mode</a></h2>
+<p>Specify the access mode of the parent dir of this dir.
+Defaults to <code>mode</code> of this entry.
+See the section <code>Mode</code> in <a href="https://www.freedesktop.org/software/systemd/man/tmpfiles.d.html"><code>tmpfiles.d(5)</code></a> for more information.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Default:</em>
+<code>config.mode</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/src-06/keep/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="keeptonamedirsparentuser"><a class="header" href="#keeptonamedirsparentuser">keepTo.&lt;name&gt;.dirs.*.parent.user</a></h2>
+<p>Specify the user that owns the parent dir of this dir.
+Defaults to <code>user</code> of this entry.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Default:</em>
+<code>config.user</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/src-06/keep/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="keeptonamedirsuser"><a class="header" href="#keeptonamedirsuser">keepTo.&lt;name&gt;.dirs.*.user</a></h2>
+<p>Specify the user that owns the dir.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Default:</em>
+<code>"root"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/src-06/keep/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="keeptonamefiles"><a class="header" href="#keeptonamefiles">keepTo.&lt;name&gt;.files</a></h2>
+<p>Specify a list of files that should be preserved.
+The paths are interpreted as absolute paths for system entries
+(when <code>username</code> is <code>root</code>), or relative to the user’s
+home dir when <code>username</code> is set to another user.</p>
+<p><em>Type:</em>
+list of ((submodule) or string convertible to it)</p>
+<p><em>Default:</em>
+<code>[ ]</code></p>
+<p><em>Example:</em></p>
+<pre><code class="language-nix">[
+  {
+    file = "/etc/wpa_supplicant.conf";
+    method = "symlink";
+  }
+  {
+    file = "/etc/machine-id";
+    inInitrd = true;
+  }
+]
+</code></pre>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/src-06/keep/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="keeptonamefilesfile"><a class="header" href="#keeptonamefilesfile">keepTo.&lt;name&gt;.files.*.file</a></h2>
+<p>Specify the path to the file that should be preserved.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/src-06/keep/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="keeptonamefilesgroup"><a class="header" href="#keeptonamefilesgroup">keepTo.&lt;name&gt;.files.*.group</a></h2>
+<p>Specify the group that owns the file.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Default:</em>
+<code>config.users.users.${defaultOwner}.group</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/src-06/keep/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="keeptonamefilesininitrd"><a class="header" href="#keeptonamefilesininitrd">keepTo.&lt;name&gt;.files.*.inInitrd</a></h2>
+<p>Whether to prepare preservation of this file in the initrd.</p>
+<p><strong>Note:</strong> For most files there is no need to enable this option.</p>
+<p><code>/etc/machine-id</code> is an exception because it needs to
+be populated/read very early.</p>
+<p><strong>Important:</strong> Note that both owner and group for this file need to be
+available in the initrd for permissions to be set correctly.</p>
+<p><em>Type:</em>
+boolean</p>
+<p><em>Default:</em>
+<code>false</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/src-06/keep/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="keeptonamefilesmethod"><a class="header" href="#keeptonamefilesmethod">keepTo.&lt;name&gt;.files.*.method</a></h2>
+<p>Specify how this file should be preserved:</p>
+<ol>
+<li>
+<p>Either a file is placed both on the volatile and on the
+persistent volume, with a bind mount from the former to the
+latter.</p>
+</li>
+<li>
+<p>Or a symlink is created on the volatile volume, pointing
+to the corresponding location on the persistent volume.</p>
+</li>
+</ol>
+<p><em>Type:</em>
+one of “bindmount”, “symlink”</p>
+<p><em>Default:</em>
+<code>"bindmount"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/src-06/keep/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="keeptonamefilesmktarget"><a class="header" href="#keeptonamefilesmktarget">keepTo.&lt;name&gt;.files.*.mkTarget</a></h2>
+<p>Only used when <code>method</code> is set to <code>symlink</code>.</p>
+<p>Specify whether to create an empty file with the specified ownership
+and permissions as target of the symlink.</p>
+<p><em>Type:</em>
+boolean</p>
+<p><em>Default:</em>
+<code>false</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/src-06/keep/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="keeptonamefilesmode"><a class="header" href="#keeptonamefilesmode">keepTo.&lt;name&gt;.files.*.mode</a></h2>
+<p>Specify the access mode of the file.
+See the section <code>Mode</code> in <a href="https://www.freedesktop.org/software/systemd/man/tmpfiles.d.html"><code>tmpfiles.d(5)</code></a> for more information.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Default:</em>
+<code>"0644"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/src-06/keep/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="keeptonamefilesmountoptions"><a class="header" href="#keeptonamefilesmountoptions">keepTo.&lt;name&gt;.files.*.mountOptions</a></h2>
+<p>Specify a list of mount options that should be used for this file.
+These options are only used when <code>method</code> is set to <code>bindmount</code>.
+By default, <code>bind</code> is added,
+use <code>mkForce</code> to override this if needed.</p>
+<p><em>Type:</em>
+list of ((submodule) or string convertible to it)</p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/src-06/keep/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="keeptonamefilesmountoptionsname"><a class="header" href="#keeptonamefilesmountoptionsname">keepTo.&lt;name&gt;.files.*.mountOptions.*.name</a></h2>
+<p>Specify the name of the mount option.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Example:</em>
+<code>"bind"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/src-06/keep/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="keeptonamefilesmountoptionsvalue"><a class="header" href="#keeptonamefilesmountoptionsvalue">keepTo.&lt;name&gt;.files.*.mountOptions.*.value</a></h2>
+<p>Optionally specify a value for the mount option.</p>
+<p><em>Type:</em>
+null or string</p>
+<p><em>Default:</em>
+<code>null</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/src-06/keep/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="keeptonamefilesparentenable"><a class="header" href="#keeptonamefilesparentenable">keepTo.&lt;name&gt;.files.*.parent.enable</a></h2>
+<p>Specify whether the parent dir of this file shall be configured with
+custom ownership and permissions.</p>
+<p>By default, missing parent dirs are always created with ownership
+<code>root:root</code> and mode <code>0755</code>, as described in <a href="https://www.freedesktop.org/software/systemd/man/tmpfiles.d.html"><code>tmpfiles.d(5)</code></a>.</p>
+<p>Ownership and mode may be configured through the options
+<code>parent.user</code>,
+<code>parent.group</code>,
+<code>parent.mode</code>.</p>
+<p>Defaults to <code>true</code> when <code>username</code> is not <code>root</code> and the path
+has a parent dir (is not a top-level path).</p>
+<p><em>Type:</em>
+boolean</p>
+<p><em>Default:</em>
+<code>false</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/src-06/keep/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="keeptonamefilesparentgroup"><a class="header" href="#keeptonamefilesparentgroup">keepTo.&lt;name&gt;.files.*.parent.group</a></h2>
+<p>Specify the group that owns the parent dir of this file.
+Defaults to <code>group</code> of this entry.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Default:</em>
+<code>config.group</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/src-06/keep/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="keeptonamefilesparentmode"><a class="header" href="#keeptonamefilesparentmode">keepTo.&lt;name&gt;.files.*.parent.mode</a></h2>
+<p>Specify the access mode of the parent dir of this file.
+Unlike dir parents, this does not default to <code>mode</code>
+of this entry: a file’s mode (e.g. <code>0644</code>) would make its parent
+dir untraversable.
+See the section <code>Mode</code> in <a href="https://www.freedesktop.org/software/systemd/man/tmpfiles.d.html"><code>tmpfiles.d(5)</code></a> for more information.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Default:</em>
+<code>"0755"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/src-06/keep/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="keeptonamefilesparentuser"><a class="header" href="#keeptonamefilesparentuser">keepTo.&lt;name&gt;.files.*.parent.user</a></h2>
+<p>Specify the user that owns the parent dir of this file.
+Defaults to <code>user</code> of this entry.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Default:</em>
+<code>config.user</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/src-06/keep/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="keeptonamefilesuser"><a class="header" href="#keeptonamefilesuser">keepTo.&lt;name&gt;.files.*.user</a></h2>
+<p>Specify the user that owns the file.</p>
+<p><em>Type:</em>
+string</p>
+<p><em>Default:</em>
+<code>"root"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/src-06/keep/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="keeptonamehidemount"><a class="header" href="#keeptonamehidemount">keepTo.&lt;name&gt;.hideMount</a></h2>
+<p>Whether to hide the bind-mounts of the preserved dirs and files
+from desktop environments and file managers, by adding the mount
+options <code>x-gvfs-hide</code> and <code>x-gdu.hide</code> to every bind-mounted entry.</p>
+<p><em>Type:</em>
+boolean</p>
+<p><em>Default:</em>
+<code>false</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/src-06/keep/blob/main/options.nix">options.nix</a></li>
+</ul>
+<h2 id="keeptonameusername"><a class="header" href="#keeptonameusername">keepTo.&lt;name&gt;.username</a></h2>
+<p>Specify the user for which <code>dirs</code> and <code>files</code> are preserved.</p>
+<p>The default <code>root</code> configures system-level preservation: paths are
+interpreted as absolute paths and ownership defaults to <code>root</code>.</p>
+<p>When set to any other user, paths are interpreted relative to that
+user’s home dir (<code>home</code>), and parent dirs on
+persistent storage are configured with the user’s ownership and
+permissions.</p>
+<p>Multiple entries with different users may be configured side by
+side, each under its own attribute name (path).</p>
+<p><em>Type:</em>
+string, not containing newlines or colons</p>
+<p><em>Default:</em>
+<code>"root"</code></p>
+<p><em>Example:</em>
+<code>"alice"</code></p>
+<p><em>Declared by:</em></p>
+<ul>
+<li><a href="https://github.com/src-06/keep/blob/main/options.nix">options.nix</a></li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="examples.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="examples.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
